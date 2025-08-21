@@ -20,54 +20,10 @@ class DashboardController extends Controller
 
     public function pengajuan(Request $request)
     {
-
-        // $data = PurchaseOrder::query()
-        //     ->join('pengajuan as b', 'b.idpengajuan', '=', 'purchaseorder.idpengajuan')
-        //     ->join('jenis_pengajuan as c', 'c.idjnspengajuan', '=', 'b.idjnspengajuan')
-        //     ->join('supplier as d', 'd.idsupplier', '=', 'purchaseorder.idsupplier')
-        //     ->join('subdivisi as e', 'e.idsubdivisi', '=', 'b.idsubdivisi')
-        //     ->join('divisi as f', 'f.id_divisi', '=', 'e.id_divisi')
-        //     ->orderBy('purchaseorder.idpo', 'desc')
-        //     ->select(
-        //         'purchaseorder.nopo',
-        //         'purchaseorder.idsupplier',
-        //         'purchaseorder.keterangan',
-        //         'purchaseorder.tanggal',
-        //         'purchaseorder.nominal',
-        //         'purchaseorder.grandtotal',
-        //         'purchaseorder.time_closing',
-        //         'b.nopengajuan',
-        //         'b.tanggal as tanggal_pengajuan',
-        //         'b.idjnspengajuan',
-        //         'b.idstatus_pe',
-        //         'b.statustagih',
-        //         'b.sumberdana',
-        //         'b.time_input as input_pengajuan',
-        //         'b.user_input as user_pengajuan',
-        //         'c.pengajuan as jenis_pengajuan',
-        //         'd.supplier',
-        //         'd.alamat as supplier_alamat',
-        //         'd.kota as supplier_kota',
-        //         'd.contactperson1 as supplier_cp1',
-        //         'd.contactperson2 as supplier_cp2',
-        //         'd.email as supplier_email',
-        //         'f.nama as divisi',
-        //         'f.keterangan as divisi_keterangan',
-        //         'e.subdivisi'
-        //     )
-        //     ->where('time_input', '>=', '2025-01-01:23:59:59')
-        //     ->paginate(10);
-
-        // $data->getCollection()->transform(function ($item) {
-        //     $item->input_pengajuan = Carbon::parse($item->input_pengajuan)->timezone('Asia/Jakarta')->isoFormat('dddd, DD MMM YYYY HH:mm');
-        //     return $item;
-        // });
-        // dd($request->all());
         $dates = $request->dates;
-        $from = Carbon::parse($dates['from'])->timezone(env('APP_TIMEZONE'))->isoFormat('YYYY-MM-DD');
-        $to = Carbon::parse($dates['to'])->timezone(env('APP_TIMEZONE'))->isoFormat('YYYY-MM-DD');
+        $from = $dates['from'];
+        $to = $dates['to'];
         $search = $request->search;
-
 
         $data = Pengajuan::query()
             ->with([

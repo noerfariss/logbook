@@ -40,4 +40,11 @@ class Pengajuan extends Model
             get: fn($value) => Carbon::parse($value)->timezone(env('APP_TIMEZONE'))->isoFormat('dddd, DD MMM YYYY HH:mm')
         );
     }
+
+    protected function tanggal(): Attribute
+    {
+        return Attribute::make(
+            get: fn($value) => Carbon::parse($value)->timezone(env('APP_TIMEZONE'))->isoFormat('dddd, DD MMM YYYY')
+        );
+    }
 }

@@ -28,14 +28,8 @@ import { Input } from '@/components/ui/input'
 import { DateRangePicker } from '@/components/ui/DateRangePicker'
 import dayjs from 'dayjs'
 import "dayjs/locale/id"
-import utc from "dayjs/plugin/utc"
-import timezone from "dayjs/plugin/timezone"
-
-dayjs.extend(utc)
-dayjs.extend(timezone)
 dayjs.locale("id")
 
-dayjs.tz.setDefault("Asia/Jakarta")
 
 
 const Dashboard = ({ message }) => {
@@ -45,13 +39,12 @@ const Dashboard = ({ message }) => {
     const [selected, setSelected] = useState(null);
     const [open, setOpen] = useState(false);
     const [openDialog, setOpenDialog] = useState(false);
-    const minDate = dayjs().tz().startOf('month').toDate();
-    const maxDate = dayjs().tz().toDate(); // hari ini
+    const minDate = dayjs().startOf('month').format('YYYY-MM-DD');
+    const maxDate = dayjs().format('YYYY-MM-DD'); // hari ini
     const [dates, setDates] = React.useState({
         from: minDate,
         to: maxDate
     });
-
 
     const getData = async (page = 1) => {
         setLoading(true);
@@ -69,6 +62,7 @@ const Dashboard = ({ message }) => {
 
     useEffect(() => {
         getData();
+        console.log(dates);
     }, []);
 
     const handleDetail = (val) => {
@@ -144,7 +138,7 @@ const Dashboard = ({ message }) => {
                                         return (
                                             <TableRow key={key} className='cursor-pointer' onClick={() => handleDetail(val)}>
                                                 <TableCell>
-                                                    <div className='text-gray-800 text-sm'>{val.time_input}</div>
+                                                    <div className='text-gray-800 text-sm'>{val.tanggal}</div>
                                                     <h3 className='font-semibold  mt-1'>{val.nopengajuan}</h3>
                                                 </TableCell>
                                                 <TableCell>

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { CalendarIcon } from "lucide-react"
 import { format } from "date-fns"
 import { id } from "date-fns/locale"
+import dayjs from "dayjs"
 
 export function DateRangePicker({ value, onChange, minDate, maxDate }) {
     const [date, setDate] = React.useState(
@@ -14,8 +15,17 @@ export function DateRangePicker({ value, onChange, minDate, maxDate }) {
     );
 
     React.useEffect(() => {
-        if (onChange) onChange(date);
+        if (onChange) onChange(date)
     }, [date]);
+
+    const handleSelect = (range) => {
+        if (!range) return;
+        const fixedRange = {
+            from: range.from ? dayjs(range.from).startOf("day").format('YYYY-MM-DD') : null,
+            to: range.to ? dayjs(range.to).endOf("day").format('YYYY-MM-DD') : null,
+        };
+        setDate(fixedRange);
+    };
 
     return (
         <Popover>
@@ -45,9 +55,12 @@ export function DateRangePicker({ value, onChange, minDate, maxDate }) {
                     mode="range"
                     defaultMonth={date?.from}
                     selected={date}
-                    onSelect={setDate}
+                    onSelect={handleSelect}
                     numberOfMonths={2}
                     locale={id}
+                    disabled={(day) =>
+                        (minDate && day < minDate) || (maxDate && day > maxDate)
+                    }
                 />
             </PopoverContent>
         </Popover>
