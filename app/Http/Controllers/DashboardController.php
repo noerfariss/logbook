@@ -20,6 +20,7 @@ class DashboardController extends Controller
 
     public function pengajuan(Request $request)
     {
+
         // $data = PurchaseOrder::query()
         //     ->join('pengajuan as b', 'b.idpengajuan', '=', 'purchaseorder.idpengajuan')
         //     ->join('jenis_pengajuan as c', 'c.idjnspengajuan', '=', 'b.idjnspengajuan')
@@ -61,8 +62,12 @@ class DashboardController extends Controller
         //     $item->input_pengajuan = Carbon::parse($item->input_pengajuan)->timezone('Asia/Jakarta')->isoFormat('dddd, DD MMM YYYY HH:mm');
         //     return $item;
         // });
-
+        // dd($request->all());
+        $dates = $request->dates;
+        $from = Carbon::parse($dates['from'])->timezone(env('APP_TIMEZONE'))->isoFormat('YYYY-MM-DD');
+        $to = Carbon::parse($dates['to'])->timezone(env('APP_TIMEZONE'))->isoFormat('YYYY-MM-DD');
         $search = $request->search;
+
 
         $data = Pengajuan::query()
             ->with([
@@ -78,7 +83,7 @@ class DashboardController extends Controller
                 });
             })
             ->where('pengajuan.bayarorder', '=', 'O')
-            ->where('pengajuan.tanggal', '>=', '2025-06-01')
+            ->whereBetween('pengajuan.tanggal', [$from, $to])
             ->select(
                 // 'pengajuan.*',
                 'pengajuan.idpengajuan',

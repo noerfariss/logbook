@@ -25,6 +25,18 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '
 import { Textarea } from '@headlessui/react'
 import TextError from '@/components/TextError'
 import { Input } from '@/components/ui/input'
+import { DateRangePicker } from '@/components/ui/DateRangePicker'
+import dayjs from 'dayjs'
+import "dayjs/locale/id"
+import utc from "dayjs/plugin/utc"
+import timezone from "dayjs/plugin/timezone"
+
+dayjs.extend(utc)
+dayjs.extend(timezone)
+dayjs.locale("id")
+
+dayjs.tz.setDefault("Asia/Jakarta")
+
 
 const Dashboard = ({ message }) => {
     const [loading, setLoading] = useState(false);
@@ -33,12 +45,18 @@ const Dashboard = ({ message }) => {
     const [selected, setSelected] = useState(null);
     const [open, setOpen] = useState(false);
     const [openDialog, setOpenDialog] = useState(false);
+    const minDate = dayjs().tz().startOf('month').toDate();
+    const maxDate = dayjs().tz().toDate(); // hari ini
+    const [dates, setDates] = React.useState({
+        from: minDate,
+        to: maxDate
+    });
 
 
     const getData = async (page = 1) => {
         setLoading(true);
         try {
-            const req = await axios.get(route('pengajuan.ajax', { page, search }));
+            const req = await axios.get(route('pengajuan.ajax', { page, search, dates }));
             const res = await req.data;
             setDatas(res);
             setLoading(false);
@@ -51,7 +69,7 @@ const Dashboard = ({ message }) => {
 
     useEffect(() => {
         getData();
-    }, [search]);
+    }, []);
 
     const handleDetail = (val) => {
         setSelected(val);
@@ -93,9 +111,16 @@ const Dashboard = ({ message }) => {
     return (
         <Layout pageTitle='Data Log Book'>
             <div className="mx-auto w-full">
-                <div className='mb-2 w-1/3'>
-                    <Input className='bg-white' placeholder='Cari No. pengajuan dan keterangan...' value={search} onChange={(e) => setSearch(e.target.value)} />
-                </div>
+                <form onSubmit={(e) => {
+                    e.preventDefault();
+                    getData();
+                }}>
+                    <div className='mb-4 w-1/2 flex items-center gap-2'>
+                        <DateRangePicker value={dates} onChange={setDates} minDate={minDate} maxDate={maxDate} />
+                        <Input className='bg-white' placeholder='Cari No. pengajuan dan keterangan...' value={search} onChange={(e) => setSearch(e.target.value)} />
+                        <Button type='submit'>GO</Button>
+                    </div>
+                </form>
 
                 <Card>
                     {loading
