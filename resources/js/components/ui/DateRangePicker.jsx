@@ -1,68 +1,95 @@
-import * as React from "react"
-import { Calendar } from "@/components/ui/calendar"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+'use client'
+
+import React, { useEffect, useState } from 'react'
+import { CalendarArrowDown } from "lucide-react"
+
 import { Button } from "@/components/ui/button"
-import { CalendarIcon } from "lucide-react"
-import { format } from "date-fns"
-import { id } from "date-fns/locale"
-import dayjs from "dayjs"
+import { Calendar } from "@/components/ui/calendar"
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from "@/components/ui/popover"
+import dayjs from 'dayjs'
+import "dayjs/locale/id"
+dayjs.locale("id")
 
-export function DateRangePicker({ value, onChange, minDate, maxDate }) {
-    const [date, setDate] = React.useState(
-        value || (minDate && maxDate
-            ? { from: minDate, to: maxDate }
-            : { from: new Date(), to: new Date() })
-    );
+export const DateRangePicker = ({ onChange }) => {
+    const today = new Date();
 
-    React.useEffect(() => {
-        if (onChange) onChange(date)
-    }, [date]);
+    const [openStart, setOpenStart] = useState(false);
+    const [dateStart, setDateStart] = useState(today);
 
-    const handleSelect = (range) => {
-        if (!range) return;
-        const fixedRange = {
-            from: range.from ? dayjs(range.from).startOf("day").format('YYYY-MM-DD') : null,
-            to: range.to ? dayjs(range.to).endOf("day").format('YYYY-MM-DD') : null,
-        };
-        setDate(fixedRange);
-    };
+    const [openEnd, setOpenEnd] = useState(false);
+    const [dateEnd, setDateEnd] = useState(today);
+
+    useEffect(() => {
+        if (onChange) {
+            onChange({
+                from: dateStart,
+                to: dateEnd
+            })
+        }
+    }, [dateStart, dateEnd])
 
     return (
-        <Popover>
-            <PopoverTrigger asChild>
-                <Button
-                    variant={"outline"}
-                    className="w-[260px] justify-start text-left font-normal"
-                >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {date?.from ? (
-                        date.to ? (
-                            <>
-                                {format(date.from, "dd MMM yyyy", { locale: id })} -{" "}
-                                {format(date.to, "dd MMM yyyy", { locale: id })}
-                            </>
-                        ) : (
-                            format(date.from, "dd MMM yyyy", { locale: id })
-                        )
-                    ) : (
-                        <span>Pilih tanggal</span>
-                    )}
-                </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                    initialFocus
-                    mode="range"
-                    defaultMonth={date?.from}
-                    selected={date}
-                    onSelect={handleSelect}
-                    numberOfMonths={2}
-                    locale={id}
-                    disabled={(day) =>
-                        (minDate && day < minDate) || (maxDate && day > maxDate)
-                    }
-                />
-            </PopoverContent>
-        </Popover>
+        <div className="flex gap-1 items-center">
+            <Popover open={openStart} onOpenChange={setOpenStart}>
+                <PopoverTrigger asChild>
+                    <Button
+                        variant="outline"
+                        id="date"
+                        className="w-48 justify-between font-normal bg-white"
+                    >
+                        {dateStart ? dayjs(dateStart).format('DD MMM YYYY') : "Mulai"}
+                        <CalendarArrowDown />
+                    </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto overflow-hidden p-0" align="start">
+                    <Calendar
+                        mode="single"
+                        selected={dateStart}
+                        captionLayout="dropdown"
+                        onSelect={(date) => {
+                            const localDate = dayjs(date).format('YYYY-MM-DD');
+                            setDateStart(localDate)
+                            if (dateEnd && dateEnd < localDate) {
+                                setDateEnd(localDate)
+                            }
+                            setOpenStart(false)
+                        }}
+                        disabled={(day) => day > today}
+                    />
+                </PopoverContent>
+            </Popover>
+
+            <div className='hidden md:block'>-</div>
+
+            <Popover open={openEnd} onOpenChange={setOpenEnd}>
+                <PopoverTrigger asChild>
+                    <Button
+                        variant="outline"
+                        id="date"
+                        className="w-48 justify-between font-normal bg-white"
+                    >
+                        {dateEnd ? dayjs(dateEnd).format('DD MMM YYYY') : "Akhir"}
+                        <CalendarArrowDown />
+                    </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto overflow-hidden p-0" align="start">
+                    <Calendar
+                        mode="single"
+                        selected={dateEnd}
+                        captionLayout="dropdown"
+                        onSelect={(date) => {
+                            const localDate = dayjs(date).format('YYYY-MM-DD');
+                            setDateEnd(localDate)
+                            setOpenEnd(false)
+                        }}
+                        disabled={(day) => day < dateStart || day > today}
+                    />
+                </PopoverContent>
+            </Popover>
+        </div>
     )
 }

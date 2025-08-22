@@ -4,7 +4,6 @@ import {
     CardContent
 } from "@/components/ui/card"
 import React, { useEffect, useState } from 'react'
-import AlertComponent from '@/components/AlertComponent'
 import PaginationComponent from '@/components/PaginationComponent'
 import axios from 'axios'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
@@ -12,38 +11,39 @@ import {
     Drawer,
     DrawerClose,
     DrawerContent,
-    DrawerDescription,
     DrawerFooter,
     DrawerHeader,
     DrawerTitle,
-    DrawerTrigger,
 } from "@/components/ui/drawer"
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { useForm } from '@inertiajs/react'
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Textarea } from '@headlessui/react'
 import TextError from '@/components/TextError'
 import { Input } from '@/components/ui/input'
 import { DateRangePicker } from '@/components/ui/DateRangePicker'
+import ButtonComponent from '@/components/ButtonComponent'
+import { toast } from 'react-toastify'
 import dayjs from 'dayjs'
 import "dayjs/locale/id"
+import { HandleDeadline } from './HandleDeadline'
+import { HandlePpn } from './HandlePpn'
+import { HandleFaktur } from './HandleFaktur'
 dayjs.locale("id")
 
 
-
-const Dashboard = ({ message }) => {
+const Dashboard = () => {
+    const today = new Date();
     const [loading, setLoading] = useState(false);
     const [search, setSearch] = useState('');
     const [datas, setDatas] = useState(null);
     const [selected, setSelected] = useState(null);
     const [open, setOpen] = useState(false);
     const [openDialog, setOpenDialog] = useState(false);
-    const minDate = dayjs().startOf('month').format('YYYY-MM-DD');
-    const maxDate = dayjs().format('YYYY-MM-DD'); // hari ini
-    const [dates, setDates] = React.useState({
-        from: minDate,
-        to: maxDate
+    const [dates, setDates] = useState({
+        from: dayjs(today).format('YYYY-MM-DD'),
+        to: dayjs(today).format('YYYY-MM-DD')
     });
 
     const getData = async (page = 1) => {
@@ -62,8 +62,7 @@ const Dashboard = ({ message }) => {
 
     useEffect(() => {
         getData();
-        console.log(dates);
-    }, []);
+    }, [selected]);
 
     const handleDetail = (val) => {
         setSelected(val);
@@ -81,13 +80,16 @@ const Dashboard = ({ message }) => {
         setOpenDialog(true);
     }
 
-    const handleSubmit = async () => {
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+
         post(route('pengajuan.updatelogs'), {
-            // preserveScroll: true,
-            // preserveState: true,
+            preserveScroll: true,
+            preserveState: true,
             onSuccess: async () => {
                 setData('keterangan', '');
                 setOpenDialog(false);
+                toast.success('Log berhasil ditambahkan');
 
                 // refresh data list
                 const res = await getData(); // ⬅️ ini sekarang ada nilai
@@ -98,7 +100,8 @@ const Dashboard = ({ message }) => {
                     );
                     setSelected(updated);
                 }
-            }
+            },
+            onError: () => toast.error('Terjadi kesalahan'),
         });
     }
 
@@ -109,10 +112,15 @@ const Dashboard = ({ message }) => {
                     e.preventDefault();
                     getData();
                 }}>
-                    <div className='mb-4 w-1/2 flex items-center gap-2'>
-                        <DateRangePicker value={dates} onChange={setDates} minDate={minDate} maxDate={maxDate} />
-                        <Input className='bg-white' placeholder='Cari No. pengajuan dan keterangan...' value={search} onChange={(e) => setSearch(e.target.value)} />
-                        <Button type='submit'>GO</Button>
+                    <div className='mb-4 w-full flex items-center gap-2 flex-col md:flex-row'>
+                        <DateRangePicker onChange={(val) => setDates({
+                            from: val.from,
+                            to: val.to
+                        })} />
+                        <div className='flex flex-row gap-2'>
+                            <Input className='bg-white flex-1 md:w-[300px]' placeholder='Cari No. pengajuan dan keterangan...' value={search} onChange={(e) => setSearch(e.target.value)} />
+                            <Button type='submit'>GO</Button>
+                        </div>
                     </div>
                 </form>
 
@@ -127,6 +135,7 @@ const Dashboard = ({ message }) => {
                                     <TableHead>Divisi</TableHead>
                                     <TableHead>Keterangan</TableHead>
                                     <TableHead>Klien</TableHead>
+                                    <TableHead>Deadline</TableHead>
                                     <TableHead>UserInput</TableHead>
                                     <TableHead>Status</TableHead>
                                 </TableRow>
@@ -152,10 +161,17 @@ const Dashboard = ({ message }) => {
                                                     <div className='font-semibold text-xs'>{val.klien}</div>
                                                     <div className='text-sm'>{val.klien_kota}</div>
                                                 </TableCell>
-                                                <TableCell>{val.user_input}</TableCell>
                                                 <TableCell>
+                                                    {
+                                                        val.deadline ?
+                                                            (<div className='text-blue-800'>{val.deadline.deadline}</div>)
+                                                            : ('-')
+                                                    }
+                                                </TableCell>
+                                                <TableCell>{val.user_input}</TableCell>
+                                                <TableCell className='mx-auto text-center'>
                                                     <div
-                                                        className={`capitalize text-center rounded-sm text-sm
+                                                        className={`capitalize text-center rounded-sm text-sm mx-auto
                                                                     ${val.status_pengajuan === 'done' ? 'bg-green-500 ' : ''}
                                                                     ${val.status_pengajuan === 'process' ? 'bg-blue-500 ' : ''}
                                                                     ${val.status_pengajuan === 'new' ? 'bg-red-500 ' : ''}`
@@ -178,13 +194,13 @@ const Dashboard = ({ message }) => {
                 <PaginationComponent data={datas} onPageChange={(page) => getData(page)} />
 
                 <Drawer open={open} onOpenChange={setOpen}>
-                    <DrawerContent className="h-[80vh]">
+                    <DrawerContent className="h-[90vh]">
                         <DrawerHeader className="text-left">
                             <DrawerTitle className='pl-8'>Detail Pengajuan</DrawerTitle>
 
                             <div className='grid grid-cols-2 px-8'>
                                 {selected && (
-                                    <div className="w-full overflow-y-scroll h-[340px] md:h-[70vh] mt-8 space-y-4">
+                                    <div className="w-full pr-16 overflow-y-scroll h-[340px] md:h-[70vh] mt-8 space-y-3">
                                         {/* No Pengajuan */}
                                         <div className="grid grid-cols-12 gap-4">
                                             <Label className="col-span-12 md:col-span-3 flex items-center">No Pengajuan</Label>
@@ -238,8 +254,50 @@ const Dashboard = ({ message }) => {
                                             <Label className="col-span-12 md:col-span-3 flex items-center">Klien</Label>
                                             <div className="col-span-12 md:col-span-9">
                                                 <div className="font-medium">{selected.klien}</div>
-                                                <div className="text-sm text-gray-500">{selected.klien_alias}</div>
                                                 <div className="text-sm text-gray-500">{selected.klien_kota}</div>
+                                            </div>
+                                        </div>
+
+                                        <div className="grid grid-cols-12 gap-4">
+                                            <Label className="col-span-12 md:col-span-3 flex items-center">Deadline</Label>
+                                            <div className="col-span-12 md:col-span-9">
+                                                <div className="font-medium flex items-center gap-3 border-b border-gray-200 pb-2 justify-between">
+                                                    {
+                                                        selected.deadline ?
+                                                            (<div className='text-blue-800'>{selected.deadline.deadline}</div>)
+                                                            : (<div className='text-red-600'>Belum diset</div>)
+                                                    }
+
+                                                    <HandleDeadline selected={selected} setSelected={(e) => setSelected(e)} />
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="grid grid-cols-12 gap-4">
+                                            <Label className="col-span-12 md:col-span-3 flex items-center">PPN</Label>
+                                            <div className="col-span-12 md:col-span-9">
+                                                <div className="font-medium flex items-center gap-3 border-b border-gray-200 pb-2 justify-between">
+                                                    {
+                                                        selected.ppn || selected.ppn == 1 ?
+                                                            (<div className='text-green-500'>YA</div>)
+                                                            : ('-')
+                                                    }
+                                                    <HandlePpn />
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="grid grid-cols-12 gap-4">
+                                            <Label className="col-span-12 md:col-span-3 flex items-center">Faktur Pajak</Label>
+                                            <div className="col-span-12 md:col-span-9">
+                                                <div className="font-medium flex items-center gap-3 border-b border-gray-200 pb-2 justify-between">
+                                                    {
+                                                        selected.faktur || selected.faktur == 1 ?
+                                                            (<div className='text-green-500'>YA</div>)
+                                                            : ('-')
+                                                    }
+                                                    <HandleFaktur />
+                                                </div>
                                             </div>
                                         </div>
 
@@ -272,59 +330,58 @@ const Dashboard = ({ message }) => {
 
                                                 <Dialog open={openDialog} onOpenChange={setOpenDialog}>
                                                     <DialogContent>
-                                                        <DialogHeader>
-                                                            <DialogTitle>Follow Up Pengajuan</DialogTitle>
-                                                        </DialogHeader>
+                                                        <form onSubmit={handleSubmit}>
+                                                            <DialogHeader>
+                                                                <DialogTitle className='mb-4'>Follow Up Pengajuan</DialogTitle>
+                                                            </DialogHeader>
 
-                                                        <div className="space-y-4">
-                                                            <div className='font-semibold'>No. Pengajuan : {selected.nopengajuan}</div>
+                                                            <div className="mb-6">
+                                                                <div className='font-semibold mb-4'>No. Pengajuan : {selected.nopengajuan}</div>
 
-                                                            <Textarea
-                                                                className={'w-full rounded-sm h-32'}
-                                                                placeholder="Masukkan keterangan"
-                                                                value={data.keterangan}
-                                                                onChange={(e) => setData("keterangan", e.target.value)}
-                                                            />
-                                                            {(errors || errors.keterangan) && <TextError message={errors.keterangan} />}
-                                                        </div>
-
-                                                        <div className="space-y-4">
-                                                            <div className='font-semibold'>Status</div>
-
-                                                            <div className='flex items-center gap-4'>
-                                                                <div className='flex items-center gap-1'>
-                                                                    <input
-                                                                        type='radio'
-                                                                        name='status'
-                                                                        id='followup'
-                                                                        value={0}
-                                                                        checked={data.status === 0}
-                                                                        onChange={() => setData('status', 0)}
-                                                                    />
-                                                                    <label htmlFor='followup'>Follow Up</label>
-                                                                </div>
-
-                                                                <div className='flex items-center gap-1'>
-                                                                    <input
-                                                                        type='radio'
-                                                                        name='status'
-                                                                        id='done'
-                                                                        value={1}
-                                                                        checked={data.status === 1}
-                                                                        onChange={() => setData('status', 1)}
-                                                                    />
-                                                                    <label htmlFor='done'>Done</label>
-                                                                </div>
+                                                                <Textarea
+                                                                    className={'w-full rounded-sm h-32'}
+                                                                    placeholder="Masukkan keterangan"
+                                                                    value={data.keterangan}
+                                                                    onChange={(e) => setData("keterangan", e.target.value)}
+                                                                />
+                                                                {(errors || errors.keterangan) && <TextError message={errors.keterangan} />}
                                                             </div>
 
-                                                            {errors.status && <TextError message={errors.status} />}
-                                                        </div>
+                                                            <div className="">
+                                                                <div className='font-semibold'>Status</div>
+                                                                <div className='flex items-center gap-4'>
+                                                                    <div className='flex items-center gap-1'>
+                                                                        <input
+                                                                            type='radio'
+                                                                            name='status'
+                                                                            id='followup'
+                                                                            value={0}
+                                                                            checked={data.status === 0}
+                                                                            onChange={() => setData('status', 0)}
+                                                                        />
+                                                                        <label htmlFor='followup'>Follow Up</label>
+                                                                    </div>
 
-                                                        <DialogFooter>
-                                                            <Button type="button" className='bg-green-600' onClick={handleSubmit}>
-                                                                Proses
-                                                            </Button>
-                                                        </DialogFooter>
+                                                                    <div className='flex items-center gap-1'>
+                                                                        <input
+                                                                            type='radio'
+                                                                            name='status'
+                                                                            id='done'
+                                                                            value={1}
+                                                                            checked={data.status === 1}
+                                                                            onChange={() => setData('status', 1)}
+                                                                        />
+                                                                        <label htmlFor='done'>Done</label>
+                                                                    </div>
+                                                                </div>
+
+                                                                {errors.status && <TextError message={errors.status} />}
+                                                            </div>
+
+                                                            <div className='mt-8'>
+                                                                <ButtonComponent text='Proses' isLoading={processing} />
+                                                            </div>
+                                                        </form>
                                                     </DialogContent>
                                                 </Dialog>
                                             </>
@@ -337,7 +394,6 @@ const Dashboard = ({ message }) => {
                                 <div className='w-full'>
                                     <h3 className='font-semibold text-lg'>Log Book</h3>
 
-                                    {message && <AlertComponent title='Sukses' description={message} />}
                                     <div className='overflow-y-scroll h-[340px] md:h-[64vh] mt-8 space-y-4'>
                                         {
                                             selected && selected.logs.length > 0 ?
@@ -368,7 +424,7 @@ const Dashboard = ({ message }) => {
                 </Drawer>
 
             </div>
-        </Layout>
+        </Layout >
     )
 }
 

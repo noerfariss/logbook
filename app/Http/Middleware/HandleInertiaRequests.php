@@ -40,6 +40,7 @@ class HandleInertiaRequests extends Middleware
             'url' => url('/'),
             'user' => $request->user(),
             'message' => $request->session()->get('message'),
+            'item' => $request->session()->get('item'),
             // 'permissions' => $request->user()?->getPermissionViaRoles()
         ];
     }

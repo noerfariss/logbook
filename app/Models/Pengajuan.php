@@ -14,12 +14,27 @@ class Pengajuan extends Model
     protected $guarded = [];
     public $timestamps = false;
 
+    protected $appends = ['status_pengajuan'];
+
     public function logs()
     {
         return $this->hasMany(PengajuanLog::class, 'pengajuan_id', 'idpengajuan');
     }
 
-    protected $appends = ['status_pengajuan'];
+    public function ppn()
+    {
+        return $this->hasOne(PengajuanPpn::class, 'pengajuan_id', 'idpengajuan');
+    }
+
+    public function faktur()
+    {
+        return $this->hasOne(PengajuanFaktur::class, 'pengajuan_id', 'idpengajuan');
+    }
+
+    public function deadline()
+    {
+        return $this->hasOne(PengajuanDeadline::class, 'pengajuan_id', 'idpengajuan');
+    }
 
     public function getStatusPengajuanAttribute()
     {

@@ -15,6 +15,7 @@ import {
 import { Link, usePage } from "@inertiajs/react"
 import dayjs from "dayjs"
 import 'dayjs/locale/id' // <- import locale Indonesia
+import { ToastContainer } from "react-toastify"
 dayjs.locale('id') // <- set locale global ke Indonesia
 
 export default function Layout({ children, pageTitle = 'Kuaat' }) {
@@ -52,7 +53,7 @@ export default function Layout({ children, pageTitle = 'Kuaat' }) {
                     </div>
                 </header>
 
-                <div className="flex flex-1 flex-col gap-4 p-20 pt-0 mt-4 w-full">
+                <div className="flex flex-1 flex-col gap-4 p-4 md:p-8 pt-0 mt-4 w-full">
                     <div className=''>
                         <h2 className='font-normal text-xl capitalize'>{pageTitle}</h2>
                     </div>
@@ -60,6 +61,7 @@ export default function Layout({ children, pageTitle = 'Kuaat' }) {
                 </div>
 
             </SidebarInset>
+            <ToastContainer />
         </SidebarProvider>
     )
 }

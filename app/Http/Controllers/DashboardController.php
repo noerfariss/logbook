@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Pengajuan;
+use App\Models\PengajuanDeadline;
 use App\Models\PengajuanLog;
 use App\Models\PurchaseOrder;
 use Carbon\Carbon;
@@ -28,7 +29,10 @@ class DashboardController extends Controller
         $data = Pengajuan::query()
             ->with([
                 'logs',
-                'logs.user:id,name'
+                'logs.user:id,name',
+                'ppn',
+                'faktur',
+                'deadline'
             ])
             ->join('subdivisi as b', 'b.idsubdivisi', '=', 'pengajuan.idsubdivisi')
             ->join('divisi as c', 'c.id_divisi', '=', 'b.id_divisi')
@@ -83,6 +87,34 @@ class DashboardController extends Controller
 
             return redirect()->back()->with('message', 'Log berhasil ditambahkan');
         } catch (\Throwable $th) {
+            info($th->getMessage());
+            return redirect()->back()->withErrors('Terjadi kesalahan');
+        }
+    }
+
+    public function updateDeadline(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'deadline' => ['required', 'date'],
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()->withErrors($validator->errors());
+        }
+
+        try {
+            $pengajuan = PengajuanDeadline::updateOrCreate(
+                [
+                    'pengajuan_id' => $request->pengajuan_id,
+                ],
+                [
+                    'deadline' => $request->deadline
+                ]
+            );
+
+            return redirect()->back()->with('item', $pengajuan);
+        } catch (\Throwable $th) {
+            info($th->getMessage());
             return redirect()->back()->withErrors('Terjadi kesalahan');
         }
     }

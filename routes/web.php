@@ -19,6 +19,7 @@ Route::prefix('auth')->middleware(['auth'])->group(function () {
     Route::prefix('pengajuan')->name('pengajuan.')->group(function () {
         Route::get('/ajax', [DashboardController::class, 'pengajuan'])->name('ajax');
         Route::post('/updatelogs', [DashboardController::class, 'updateLog'])->name('updatelogs');
+        Route::post('/updatedeadline', [DashboardController::class, 'updatedeadline'])->name('updatedeadline');
     });
 
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
