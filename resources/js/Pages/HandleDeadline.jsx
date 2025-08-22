@@ -9,7 +9,7 @@ import "dayjs/locale/id"
 import { toast } from 'react-toastify';
 dayjs.locale("id")
 
-export const HandleDeadline = ({ selected, setSelected }) => {
+export const HandleDeadline = ({ selected, setSelected, setRefresh }) => {
     const [open, setOpen] = useState(false);
     const { post, data, setData, processing, errors } = useForm({
         pengajuan_id: null,
@@ -35,10 +35,9 @@ export const HandleDeadline = ({ selected, setSelected }) => {
                 }
 
                 setSelected(updateSelected);
+                setRefresh(true);
 
                 toast.success('Deadline berhasil diperbaruhi');
-
-
             },
             onError: () => toast.error('Terjadi kesalahan'),
         });

@@ -41,6 +41,7 @@ const Dashboard = () => {
     const [selected, setSelected] = useState(null);
     const [open, setOpen] = useState(false);
     const [openDialog, setOpenDialog] = useState(false);
+    const [refresh, setRefresh] = useState(false);
     const [dates, setDates] = useState({
         from: dayjs(today).format('YYYY-MM-DD'),
         to: dayjs(today).format('YYYY-MM-DD')
@@ -62,9 +63,17 @@ const Dashboard = () => {
 
     useEffect(() => {
         getData();
-    }, [selected]);
+    }, []);
+
+    useEffect(() => {
+        if (refresh) {
+            getData();
+        }
+    }, [selected, refresh]);
+
 
     const handleDetail = (val) => {
+        setRefresh(false);
         setSelected(val);
         setOpen(true);
     }
@@ -268,7 +277,7 @@ const Dashboard = () => {
                                                             : (<div className='text-red-600'>Belum diset</div>)
                                                     }
 
-                                                    <HandleDeadline selected={selected} setSelected={(e) => setSelected(e)} />
+                                                    <HandleDeadline selected={selected} setSelected={(e) => setSelected(e)} setRefresh={(e) => setRefresh(e)}/>
                                                 </div>
                                             </div>
                                         </div>
