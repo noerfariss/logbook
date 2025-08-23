@@ -18,7 +18,7 @@ export const DateRangePicker = ({ onChange }) => {
     const today = new Date();
 
     const [openStart, setOpenStart] = useState(false);
-    const [dateStart, setDateStart] = useState(today);
+    const [dateStart, setDateStart] = useState(dayjs().startOf('month').toDate());
 
     const [openEnd, setOpenEnd] = useState(false);
     const [dateEnd, setDateEnd] = useState(today);

@@ -43,7 +43,7 @@ const Dashboard = () => {
     const [openDialog, setOpenDialog] = useState(false);
     const [refresh, setRefresh] = useState(false);
     const [dates, setDates] = useState({
-        from: dayjs(today).format('YYYY-MM-DD'),
+        from: dayjs().startOf('month').format('YYYY-MM-DD'),
         to: dayjs(today).format('YYYY-MM-DD')
     });
 
