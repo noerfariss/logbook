@@ -31,15 +31,15 @@ export default function Layout({ children, pageTitle = 'Kuaat' }) {
                             <Link href={route('dashboard')}>
                                 <div className="flex items-center gap-4">
                                     <img src={logo} width={100} />
-                                    <h4 className="font-bold text-lg">Log Book</h4>
+                                    <h4 className="font-bold text-lg hidden md:block">Log Book</h4>
                                 </div>
                             </Link>
                             {/* <SidebarTrigger className="-ml-1" /> */}
                             <Separator
                                 orientation="vertical"
-                                className="mr-2 data-[orientation=vertical]:h-4"
+                                className="mr-2 data-[orientation=vertical]:h-4 hidden md:block"
                             />
-                            <Breadcrumb>
+                            <Breadcrumb className='hidden md:block'>
                                 <BreadcrumbList>
                                     <BreadcrumbItem>
                                         <BreadcrumbPage>{dayjs().format('dddd, DD MMMM YYYY')}</BreadcrumbPage>

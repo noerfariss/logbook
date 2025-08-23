@@ -142,10 +142,10 @@ const Dashboard = () => {
                                 <TableRow>
                                     <TableHead>Tanggal</TableHead>
                                     <TableHead>Divisi</TableHead>
-                                    <TableHead>Keterangan</TableHead>
-                                    <TableHead>Klien</TableHead>
-                                    <TableHead>Deadline</TableHead>
-                                    <TableHead>UserInput</TableHead>
+                                    <TableHead className='hidden md:table-cell'>Keterangan</TableHead>
+                                    <TableHead className='hidden md:table-cell'>Klien</TableHead>
+                                    <TableHead className='hidden md:table-cell'>Deadline</TableHead>
+                                    <TableHead className='hidden md:table-cell'>UserInput</TableHead>
                                     <TableHead>Status</TableHead>
                                 </TableRow>
                             </TableHeader>
@@ -163,21 +163,21 @@ const Dashboard = () => {
                                                     <div className='text-xs bg-blue-300 rounded-sm inline px-1'>{val.divisi}</div>
                                                     <div>{val.subdivisi}</div>
                                                 </TableCell>
-                                                <TableCell className='w-[500px]'>
+                                                <TableCell className='w-[500px] hidden md:table-cell'>
                                                     <p>{val.keterangan}</p>
                                                 </TableCell>
-                                                <TableCell>
+                                                <TableCell className='hidden md:table-cell'>
                                                     <div className='font-semibold text-xs'>{val.klien}</div>
                                                     <div className='text-sm'>{val.klien_kota}</div>
                                                 </TableCell>
-                                                <TableCell>
+                                                <TableCell className='hidden md:table-cell'>
                                                     {
                                                         val.deadline ?
                                                             (<div className='text-blue-800'>{val.deadline.deadline}</div>)
                                                             : ('-')
                                                     }
                                                 </TableCell>
-                                                <TableCell>{val.user_input}</TableCell>
+                                                <TableCell className='hidden md:table-cell'>{val.user_input}</TableCell>
                                                 <TableCell className='mx-auto text-center'>
                                                     <div
                                                         className={`capitalize text-center rounded-sm text-sm mx-auto
@@ -200,18 +200,19 @@ const Dashboard = () => {
 
                 </Card>
 
+
                 <PaginationComponent data={datas} onPageChange={(page) => getData(page)} />
 
                 <Drawer open={open} onOpenChange={setOpen}>
-                    <DrawerContent className="h-[90vh]">
+                    <DrawerContent className="h-full md:h-[90vh]">
                         <DrawerHeader className="text-left">
-                            <DrawerTitle className='pl-8'>Detail Pengajuan</DrawerTitle>
+                            <DrawerTitle className='pl-0 md:pl-8'>Detail Pengajuan</DrawerTitle>
 
-                            <div className='grid grid-cols-2 px-8'>
+                            <div className='grid grid-cols-1 md:grid-cols-2 px-0 md:px-8'>
                                 {selected && (
-                                    <div className="w-full pr-16 overflow-y-scroll h-[340px] md:h-[70vh] mt-8 space-y-3">
+                                    <div className="w-full p-0 md:pr-16 overflow-y-scroll h-[340px] md:h-[70vh] mt-3 md:mt-8 space-y-3">
                                         {/* No Pengajuan */}
-                                        <div className="grid grid-cols-12 gap-4">
+                                        <div className="grid grid-cols-12 gap-0 md:gap-4">
                                             <Label className="col-span-12 md:col-span-3 flex items-center">No Pengajuan</Label>
                                             <div className="col-span-12 md:col-span-9">
                                                 {selected.nopengajuan}
@@ -219,7 +220,7 @@ const Dashboard = () => {
                                         </div>
 
                                         {/* Tanggal */}
-                                        <div className="grid grid-cols-12 gap-4">
+                                        <div className="grid grid-cols-12 gap-0 md:gap-4">
                                             <Label className="col-span-12 md:col-span-3 flex items-center">Tanggal</Label>
                                             <div className="col-span-12 md:col-span-9">
                                                 {selected.time_input}
@@ -227,7 +228,7 @@ const Dashboard = () => {
                                         </div>
 
                                         {/* User Input */}
-                                        <div className="grid grid-cols-12 gap-4">
+                                        <div className="grid grid-cols-12 gap-0 md:gap-4">
                                             <Label className="col-span-12 md:col-span-3 flex items-center">User Input</Label>
                                             <div className="col-span-12 md:col-span-9">
                                                 {selected.user_input}
@@ -235,7 +236,7 @@ const Dashboard = () => {
                                         </div>
 
                                         {/* Nominal */}
-                                        <div className="grid grid-cols-12 gap-4">
+                                        <div className="grid grid-cols-12 gap-0 md:gap-4">
                                             <Label className="col-span-12 md:col-span-3 flex items-center">Nominal</Label>
                                             <div className="col-span-12 md:col-span-9 font-semibold">
                                                 Rp {selected.nominal.toLocaleString("id-ID")}
@@ -243,7 +244,7 @@ const Dashboard = () => {
                                         </div>
 
                                         {/* Keterangan */}
-                                        <div className="grid grid-cols-12 gap-4">
+                                        <div className="grid grid-cols-12 gap-0 md:gap-4">
                                             <Label className="col-span-12 md:col-span-3 flex items-center">Keterangan</Label>
                                             <div className="col-span-12 md:col-span-9">
                                                 {selected.keterangan}
@@ -251,7 +252,7 @@ const Dashboard = () => {
                                         </div>
 
                                         {/* Subdivisi / Divisi */}
-                                        <div className="grid grid-cols-12 gap-4">
+                                        <div className="grid grid-cols-12 gap-0 md:gap-4">
                                             <Label className="col-span-12 md:col-span-3 flex items-center">Subdivisi</Label>
                                             <div className="col-span-12 md:col-span-9">
                                                 {selected.subdivisi} / {selected.divisi}
@@ -259,7 +260,7 @@ const Dashboard = () => {
                                         </div>
 
                                         {/* Klien */}
-                                        <div className="grid grid-cols-12 gap-4">
+                                        <div className="grid grid-cols-12 gap-0 md:gap-4">
                                             <Label className="col-span-12 md:col-span-3 flex items-center">Klien</Label>
                                             <div className="col-span-12 md:col-span-9">
                                                 <div className="font-medium">{selected.klien}</div>
@@ -267,7 +268,7 @@ const Dashboard = () => {
                                             </div>
                                         </div>
 
-                                        <div className="grid grid-cols-12 gap-4">
+                                        <div className="grid grid-cols-12 gap-0 md:gap-4">
                                             <Label className="col-span-12 md:col-span-3 flex items-center">Deadline</Label>
                                             <div className="col-span-12 md:col-span-9">
                                                 <div className="font-medium flex items-center gap-3 border-b border-gray-200 pb-2 justify-between">
@@ -282,7 +283,7 @@ const Dashboard = () => {
                                             </div>
                                         </div>
 
-                                        <div className="grid grid-cols-12 gap-4">
+                                        <div className="grid grid-cols-12 gap-0 md:gap-4">
                                             <Label className="col-span-12 md:col-span-3 flex items-center">PPN</Label>
                                             <div className="col-span-12 md:col-span-9">
                                                 <div className="font-medium flex items-center gap-3 border-b border-gray-200 pb-2 justify-between">
@@ -300,7 +301,7 @@ const Dashboard = () => {
                                             </div>
                                         </div>
 
-                                        <div className="grid grid-cols-12 gap-4">
+                                        <div className="grid grid-cols-12 gap-0 md:gap-4">
                                             <Label className="col-span-12 md:col-span-3 flex items-center">Faktur Pajak</Label>
                                             <div className="col-span-12 md:col-span-9">
                                                 <div className="font-medium flex items-center gap-3 border-b border-gray-200 pb-2 justify-between">
@@ -319,7 +320,7 @@ const Dashboard = () => {
                                         </div>
 
                                         {/* Status Pengajuan */}
-                                        <div className="grid grid-cols-12 gap-4">
+                                        <div className="grid grid-cols-12 gap-0 md:gap-4">
                                             <Label className="col-span-12 md:col-span-3 flex items-center">Status</Label>
                                             <div className="col-span-12 md:col-span-9">
                                                 <span
@@ -338,7 +339,7 @@ const Dashboard = () => {
 
                                         {selected.status_pengajuan !== 'done' &&
                                             <>
-                                                <div className="grid grid-cols-12 gap-4">
+                                                <div className="grid grid-cols-12 gap-0 md:gap-4">
                                                     <Label className="col-span-12 md:col-span-3 flex items-center"></Label>
                                                     <div className="col-span-12 md:col-span-9">
                                                         <Button className='w-3/4 mt-12' onClick={handleDialog}>Follow up</Button>
@@ -408,10 +409,10 @@ const Dashboard = () => {
                                     </div>
                                 )}
 
-                                <div className='w-full'>
+                                <div className='w-full mt-6 md:mt-0'>
                                     <h3 className='font-semibold text-lg'>Log Book</h3>
 
-                                    <div className='overflow-y-scroll h-[340px] md:h-[64vh] mt-8 space-y-4'>
+                                    <div className='overflow-y-scroll h-[100px] md:h-[64vh] mt-3 md:mt-8 space-y-4'>
                                         {
                                             selected && selected.logs.length > 0 ?
                                                 selected.logs.map((val, i) => {
