@@ -277,7 +277,7 @@ const Dashboard = () => {
                                                             : (<div className='text-red-600'>Belum diset</div>)
                                                     }
 
-                                                    <HandleDeadline selected={selected} setSelected={(e) => setSelected(e)} setRefresh={(e) => setRefresh(e)}/>
+                                                    <HandleDeadline selected={selected} setSelected={(e) => setSelected(e)} setRefresh={(e) => setRefresh(e)} />
                                                 </div>
                                             </div>
                                         </div>
@@ -287,11 +287,15 @@ const Dashboard = () => {
                                             <div className="col-span-12 md:col-span-9">
                                                 <div className="font-medium flex items-center gap-3 border-b border-gray-200 pb-2 justify-between">
                                                     {
-                                                        selected.ppn || selected.ppn == 1 ?
-                                                            (<div className='text-green-500'>YA</div>)
+                                                        selected.ppn ?
+                                                            (
+                                                                selected.ppn.status == 1 ?
+                                                                    (<div className='text-green-500'>YA</div>)
+                                                                    : (<div className='text-red-500'>TIDAK</div>)
+                                                            )
                                                             : ('-')
                                                     }
-                                                    <HandlePpn />
+                                                    <HandlePpn selected={selected} setSelected={setSelected} setRefresh={setRefresh} />
                                                 </div>
                                             </div>
                                         </div>
@@ -301,11 +305,15 @@ const Dashboard = () => {
                                             <div className="col-span-12 md:col-span-9">
                                                 <div className="font-medium flex items-center gap-3 border-b border-gray-200 pb-2 justify-between">
                                                     {
-                                                        selected.faktur || selected.faktur == 1 ?
-                                                            (<div className='text-green-500'>YA</div>)
+                                                        selected.faktur ?
+                                                            (
+                                                                selected.faktur.status == 1 ?
+                                                                    (<div className='text-green-500'>YA</div>)
+                                                                    : (<div className='text-red-500'>TIDAK</div>)
+                                                            )
                                                             : ('-')
                                                     }
-                                                    <HandleFaktur />
+                                                    <HandleFaktur selected={selected} setSelected={setSelected} setRefresh={setRefresh} />
                                                 </div>
                                             </div>
                                         </div>

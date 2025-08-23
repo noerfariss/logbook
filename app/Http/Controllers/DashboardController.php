@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Pengajuan;
 use App\Models\PengajuanDeadline;
+use App\Models\PengajuanFaktur;
 use App\Models\PengajuanLog;
+use App\Models\PengajuanPpn;
 use App\Models\PurchaseOrder;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -109,6 +111,60 @@ class DashboardController extends Controller
                 ],
                 [
                     'deadline' => $request->deadline
+                ]
+            );
+
+            return redirect()->back()->with('item', $pengajuan);
+        } catch (\Throwable $th) {
+            info($th->getMessage());
+            return redirect()->back()->withErrors('Terjadi kesalahan');
+        }
+    }
+
+    public function updatePpn(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'status' => ['required'],
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()->withErrors($validator->errors());
+        }
+
+        try {
+            $pengajuan = PengajuanPpn::updateOrCreate(
+                [
+                    'pengajuan_id' => $request->pengajuan_id,
+                ],
+                [
+                    'status' => $request->status
+                ]
+            );
+
+            return redirect()->back()->with('item', $pengajuan);
+        } catch (\Throwable $th) {
+            info($th->getMessage());
+            return redirect()->back()->withErrors('Terjadi kesalahan');
+        }
+    }
+
+    public function updateFaktur(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'status' => ['required'],
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()->withErrors($validator->errors());
+        }
+
+        try {
+            $pengajuan = PengajuanFaktur::updateOrCreate(
+                [
+                    'pengajuan_id' => $request->pengajuan_id,
+                ],
+                [
+                    'status' => $request->status
                 ]
             );
 

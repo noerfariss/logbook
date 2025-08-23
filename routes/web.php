@@ -20,6 +20,8 @@ Route::prefix('auth')->middleware(['auth'])->group(function () {
         Route::get('/ajax', [DashboardController::class, 'pengajuan'])->name('ajax');
         Route::post('/updatelogs', [DashboardController::class, 'updateLog'])->name('updatelogs');
         Route::post('/updatedeadline', [DashboardController::class, 'updatedeadline'])->name('updatedeadline');
+        Route::post('/updateppn', [DashboardController::class, 'updateppn'])->name('updateppn');
+        Route::post('/updatefaktur', [DashboardController::class, 'updatefaktur'])->name('updatefaktur');
     });
 
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
