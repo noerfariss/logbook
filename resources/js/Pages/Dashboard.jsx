@@ -30,6 +30,7 @@ import { HandlePpn } from './HandlePpn'
 import { HandleFaktur } from './HandleFaktur'
 import dayjs from 'dayjs'
 import "dayjs/locale/id"
+import { Copy } from 'lucide-react'
 dayjs.locale("id")
 
 const Dashboard = () => {
@@ -42,6 +43,8 @@ const Dashboard = () => {
     const [openDialog, setOpenDialog] = useState(false);
     const [refresh, setRefresh] = useState(false);
     const [statusFilter, setStatusFilter] = useState([]);
+    const [copied, setCopied] = useState(false);
+
     const [dates, setDates] = useState({
         from: dayjs().startOf('month').format('YYYY-MM-DD'),
         to: dayjs(today).format('YYYY-MM-DD')
@@ -84,6 +87,23 @@ const Dashboard = () => {
                 return prev.filter((item) => item !== value); // hapus status
             }
         });
+    };
+
+    const handleCopy = async (ID = false) => {
+        try {
+            if(ID){
+                await navigator.clipboard.writeText(selected.idpengajuan);
+                toast.success('ID Pengajuan berhasil disalin!')
+            }else{
+                await navigator.clipboard.writeText(selected.nopengajuan);
+                toast.success('No. Pengajuan berhasil disalin!')
+            }
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000); // reset tulisan setelah 2 detik
+
+        } catch (err) {
+            console.error("Gagal copy:", err);
+        }
     };
 
     useEffect(() => {
@@ -276,15 +296,17 @@ const Dashboard = () => {
                                         {/* No Pengajuan */}
                                         <div className="grid grid-cols-12 gap-0 md:gap-4">
                                             <Label className="col-span-12 md:col-span-3 flex items-center">ID</Label>
-                                            <div className="col-span-12 md:col-span-9">
+                                            <div className="col-span-12 md:col-span-9 flex items-center gap-4">
                                                 {selected.idpengajuan}
+                                                <Button onClick={() => handleCopy(true)} variant='outline' size='xs' className='p-1'><Copy /></Button>
                                             </div>
                                         </div>
 
                                         <div className="grid grid-cols-12 gap-0 md:gap-4">
                                             <Label className="col-span-12 md:col-span-3 flex items-center">No Pengajuan</Label>
-                                            <div className="col-span-12 md:col-span-9">
+                                            <div className="col-span-12 md:col-span-9 flex items-center gap-4">
                                                 {selected.nopengajuan}
+                                                <Button onClick={() => handleCopy()} variant='outline' size='xs' className='p-1'><Copy/></Button>
                                             </div>
                                         </div>
 
