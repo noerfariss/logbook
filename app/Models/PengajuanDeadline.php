@@ -37,10 +37,10 @@ class PengajuanDeadline extends Model
         ]);
     }
 
-    protected function deadline(): Attribute
-    {
-        return Attribute::make(
-            get: fn($value) => $value ? Carbon::parse($value)->timezone(env('APP_TIMEZONE'))->isoFormat('dddd, DD MMM YYYY') : null,
-        );
-    }
+    // protected function deadline(): Attribute
+    // {
+    //     return Attribute::make(
+    //         get: fn($value) => $value ? Carbon::parse($value)->timezone(env('APP_TIMEZONE'))->isoFormat('dddd, DD MMM YYYY') : null,
+    //     );
+    // }
 }

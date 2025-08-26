@@ -6,8 +6,8 @@ import { useForm, usePage } from '@inertiajs/react';
 import { Calendar } from '@/components/ui/calendar';
 import dayjs from 'dayjs'
 import "dayjs/locale/id"
-import { toast } from 'react-toastify';
 dayjs.locale("id")
+import { toast } from 'react-toastify';
 
 export const HandleDeadline = ({ selected, setSelected, setRefresh }) => {
     const [open, setOpen] = useState(false);
@@ -31,7 +31,7 @@ export const HandleDeadline = ({ selected, setSelected, setRefresh }) => {
                 const item = data.props.item;
                 const updateSelected = {
                     ...selected,
-                    deadline: item
+                    deadline: item.deadline
                 }
 
                 setSelected(updateSelected);
@@ -41,6 +41,10 @@ export const HandleDeadline = ({ selected, setSelected, setRefresh }) => {
             },
             onError: () => toast.error('Terjadi kesalahan'),
         });
+    }
+
+    if(selected.status_pengajuan === 'done'){
+        return false;
     }
 
     return (
@@ -64,7 +68,6 @@ export const HandleDeadline = ({ selected, setSelected, setRefresh }) => {
                                 }}
                             />
                         </div>
-
                         <div className='mt-8'>
                             <ButtonComponent text='Simpan Deadline' isLoading={processing} />
                         </div>

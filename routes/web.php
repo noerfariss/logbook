@@ -18,6 +18,7 @@ Route::prefix('auth')->middleware(['auth'])->group(function () {
 
     Route::prefix('pengajuan')->name('pengajuan.')->group(function () {
         Route::get('/ajax', [DashboardController::class, 'pengajuan'])->name('ajax');
+        Route::get('/getlogs', [DashboardController::class, 'getLogs'])->name('getlogs');
         Route::post('/updatelogs', [DashboardController::class, 'updateLog'])->name('updatelogs');
         Route::post('/updatedeadline', [DashboardController::class, 'updatedeadline'])->name('updatedeadline');
         Route::post('/updateppn', [DashboardController::class, 'updateppn'])->name('updateppn');

@@ -15,7 +15,7 @@ export const HandleFaktur = ({ selected, setSelected, setRefresh }) => {
     useEffect(() => {
         if (selected?.idpengajuan) {
             setData('pengajuan_id', selected.idpengajuan);
-            setData('status', selected?.faktur?.status);
+            setData('status', selected?.faktur);
         }
     }, [selected]);
 
@@ -28,7 +28,7 @@ export const HandleFaktur = ({ selected, setSelected, setRefresh }) => {
                 const item = data.props.item;
                 const updateSelected = {
                     ...selected,
-                    faktur: item
+                    faktur: item.status
                 }
 
                 setSelected(updateSelected);
@@ -38,6 +38,10 @@ export const HandleFaktur = ({ selected, setSelected, setRefresh }) => {
             },
             onError: () => toast.error('Terjadi kesalahan'),
         });
+    }
+
+    if (selected.status_pengajuan === 'done') {
+        return false;
     }
 
     return (

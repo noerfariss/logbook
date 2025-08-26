@@ -15,7 +15,7 @@ export const HandlePpn = ({ selected, setSelected, setRefresh }) => {
     useEffect(() => {
         if (selected?.idpengajuan) {
             setData('pengajuan_id', selected.idpengajuan);
-            setData('status', selected?.ppn?.status);
+            setData('status', selected?.ppn);
         }
     }, [selected]);
 
@@ -29,7 +29,7 @@ export const HandlePpn = ({ selected, setSelected, setRefresh }) => {
                 const item = data.props.item;
                 const updateSelected = {
                     ...selected,
-                    ppn: item
+                    ppn: item.status
                 }
 
                 setSelected(updateSelected);
@@ -41,6 +41,9 @@ export const HandlePpn = ({ selected, setSelected, setRefresh }) => {
         });
     }
 
+    if (selected.status_pengajuan === 'done') {
+        return false;
+    }
 
     return (
         <>

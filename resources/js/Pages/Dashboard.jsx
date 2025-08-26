@@ -25,13 +25,12 @@ import { Input } from '@/components/ui/input'
 import { DateRangePicker } from '@/components/ui/DateRangePicker'
 import ButtonComponent from '@/components/ButtonComponent'
 import { toast } from 'react-toastify'
-import dayjs from 'dayjs'
-import "dayjs/locale/id"
 import { HandleDeadline } from './HandleDeadline'
 import { HandlePpn } from './HandlePpn'
 import { HandleFaktur } from './HandleFaktur'
+import dayjs from 'dayjs'
+import "dayjs/locale/id"
 dayjs.locale("id")
-
 
 const Dashboard = () => {
     const today = new Date();
@@ -51,7 +50,11 @@ const Dashboard = () => {
     const getData = async (page = 1) => {
         setLoading(true);
         try {
-            const req = await axios.get(route('pengajuan.ajax', { page, search, statusFilter, dates }));
+            const req = await axios.get(
+                route('pengajuan.ajax', {
+                    page, search, statusFilter, dates
+                }
+                ));
             const res = await req.data;
             setDatas(res);
             setLoading(false);
@@ -59,6 +62,16 @@ const Dashboard = () => {
         } catch (error) {
             console.log(error);
             setLoading(false);
+        }
+    }
+
+    const getLogs = async (pengajuan_id) => {
+        try {
+            const req = await axios.get(route('pengajuan.getlogs', { pengajuan_id }));
+            const res = await req.data;
+            return res;
+        } catch (error) {
+            console.log(error);
         }
     }
 
@@ -80,14 +93,19 @@ const Dashboard = () => {
     useEffect(() => {
         if (refresh) {
             getData();
+            // getLogs(selected.idpengajuan);
         }
     }, [selected, refresh]);
 
-
-    const handleDetail = (val) => {
+    const handleDetail = async (val) => {
         setRefresh(false);
-        setSelected(val);
         setOpen(true);
+
+        const logs = await getLogs(val.idpengajuan);
+        setSelected({
+            ...val,
+            logs: logs
+        });
     }
 
     const { data, setData, post, reset, errors, processing } = useForm({
@@ -107,20 +125,18 @@ const Dashboard = () => {
         post(route('pengajuan.updatelogs'), {
             preserveScroll: true,
             preserveState: true,
-            onSuccess: async () => {
+            onSuccess: async (data) => {
                 setData('keterangan', '');
                 setOpenDialog(false);
                 toast.success('Log berhasil ditambahkan');
 
-                // refresh data list
-                const res = await getData(); // ⬅️ ini sekarang ada nilai
-
-                if (selected && res?.data) {
-                    const updated = res.data.find(
-                        (item) => item.idpengajuan === selected.idpengajuan
-                    );
-                    setSelected(updated);
-                }
+                const item = data.props.item;
+                const logs = await getLogs(selected.idpengajuan);
+                setSelected({
+                    ...item,
+                    logs: logs
+                });
+                setRefresh(true);
             },
             onError: () => toast.error('Terjadi kesalahan'),
         });
@@ -219,7 +235,7 @@ const Dashboard = () => {
                                                 <TableCell className='hidden md:table-cell'>
                                                     {
                                                         val.deadline ?
-                                                            (<div className='text-blue-800'>{val.deadline.deadline}</div>)
+                                                            (<div className='text-blue-800'>{dayjs(val.deadline).format('dddd, DD MMM YYYY')}</div>)
                                                             : ('-')
                                                     }
                                                 </TableCell>
@@ -256,8 +272,15 @@ const Dashboard = () => {
 
                             <div className='grid grid-cols-1 md:grid-cols-2 px-0 md:px-8'>
                                 {selected && (
-                                    <div className="w-full p-0 md:pr-16 overflow-y-scroll h-[340px] md:h-[70vh] mt-3 md:mt-8 space-y-3">
+                                    <div className="w-full p-0 md:pr-16 overflow-y-scroll h-[340px] md:h-[70vh] mt-3 md:mt-8 space-y-2">
                                         {/* No Pengajuan */}
+                                        <div className="grid grid-cols-12 gap-0 md:gap-4">
+                                            <Label className="col-span-12 md:col-span-3 flex items-center">ID</Label>
+                                            <div className="col-span-12 md:col-span-9">
+                                                {selected.idpengajuan}
+                                            </div>
+                                        </div>
+
                                         <div className="grid grid-cols-12 gap-0 md:gap-4">
                                             <Label className="col-span-12 md:col-span-3 flex items-center">No Pengajuan</Label>
                                             <div className="col-span-12 md:col-span-9">
@@ -320,7 +343,7 @@ const Dashboard = () => {
                                                 <div className="font-medium flex items-center gap-3 border-b border-gray-200 pb-2 justify-between">
                                                     {
                                                         selected.deadline ?
-                                                            (<div className='text-blue-800'>{selected.deadline.deadline}</div>)
+                                                            (<div className='text-blue-800'>{dayjs(selected.deadline).format('dddd, DD MMM YYYY')}</div>)
                                                             : (<div className='text-red-600'>Belum diset</div>)
                                                     }
 
@@ -334,13 +357,12 @@ const Dashboard = () => {
                                             <div className="col-span-12 md:col-span-9">
                                                 <div className="font-medium flex items-center gap-3 border-b border-gray-200 pb-2 justify-between">
                                                     {
-                                                        selected.ppn ?
-                                                            (
-                                                                selected.ppn.status == 1 ?
-                                                                    (<div className='text-green-500'>YA</div>)
-                                                                    : (<div className='text-red-500'>TIDAK</div>)
+                                                        selected.ppn === null || selected.ppn === ''
+                                                            ? ('-')
+                                                            : (selected.ppn === 1
+                                                                ? (<div className='text-green-500'>YA</div>)
+                                                                : (<div className='text-red-500'>TIDAK</div>)
                                                             )
-                                                            : ('-')
                                                     }
                                                     <HandlePpn selected={selected} setSelected={setSelected} setRefresh={setRefresh} />
                                                 </div>
@@ -352,14 +374,14 @@ const Dashboard = () => {
                                             <div className="col-span-12 md:col-span-9">
                                                 <div className="font-medium flex items-center gap-3 border-b border-gray-200 pb-2 justify-between">
                                                     {
-                                                        selected.faktur ?
-                                                            (
-                                                                selected.faktur.status == 1 ?
-                                                                    (<div className='text-green-500'>YA</div>)
-                                                                    : (<div className='text-red-500'>TIDAK</div>)
+                                                        selected.faktur === null || selected.faktur === ''
+                                                            ? ('-')
+                                                            : (selected.faktur === 1
+                                                                ? (<div className='text-green-500'>YA</div>)
+                                                                : (<div className='text-red-500'>TIDAK</div>)
                                                             )
-                                                            : ('-')
                                                     }
+
                                                     <HandleFaktur selected={selected} setSelected={setSelected} setRefresh={setRefresh} />
                                                 </div>
                                             </div>
@@ -455,27 +477,29 @@ const Dashboard = () => {
                                     </div>
                                 )}
 
-                                <div className='w-full mt-6 md:mt-0'>
-                                    <h3 className='font-semibold text-lg'>Log Book</h3>
+                                {selected &&
+                                    <div className='w-full mt-6 md:mt-0'>
+                                        <h3 className='font-semibold text-lg'>Log Book</h3>
 
-                                    <div className='overflow-y-scroll h-[100px] md:h-[64vh] mt-3 md:mt-8 space-y-4'>
-                                        {
-                                            selected && selected.logs.length > 0 ?
-                                                selected.logs.map((val, i) => {
-                                                    return (
-                                                        <Card key={i}>
-                                                            <CardContent className='p-4'>
-                                                                <p>{val.keterangan}</p>
-                                                                <h5 className='italic font-semibold text-gray-500 text-sm mt-2'>- {val.created_at} ({val.user.name})</h5>
-                                                            </CardContent>
-                                                        </Card>
-                                                    )
-                                                })
-                                                : <div className='w-full p-4 text-center border border-gray-400 rounded-lg'>Belum ada follow up</div>
-                                        }
+                                        <div className='overflow-y-scroll h-[100px] md:h-[64vh] mt-3 md:mt-8 space-y-4'>
+                                            {
+                                                selected && selected.logs.length > 0 ?
+                                                    selected.logs.map((val, i) => {
+                                                        return (
+                                                            <Card key={i}>
+                                                                <CardContent className='p-4'>
+                                                                    <p>{val.keterangan}</p>
+                                                                    <h5 className='italic font-semibold text-gray-500 text-sm mt-2'>- {val.created_at} ({val.user.name})</h5>
+                                                                </CardContent>
+                                                            </Card>
+                                                        )
+                                                    })
+                                                    : <div className='w-full p-4 text-center border border-gray-400 rounded-lg'>Belum ada follow up</div>
+                                            }
+                                        </div>
                                     </div>
+                                }
 
-                                </div>
                             </div>
                         </DrawerHeader>
 

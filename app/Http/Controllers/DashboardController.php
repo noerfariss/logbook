@@ -28,62 +28,139 @@ class DashboardController extends Controller
         $to = $dates['to'];
         $search = $request->search;
         $status = $request->statusFilter;
-        // dd($status);
 
-        $data = Pengajuan::query()
-            ->with([
-                'logs',
-                'logs.user:id,name',
-                'ppn',
-                'faktur',
-                'deadline'
-            ])
-            ->join('subdivisi as b', 'b.idsubdivisi', '=', 'pengajuan.idsubdivisi')
+        $data = DB::connection('alternative')->table('pengajuan as p')
+            ->join('subdivisi as b', 'b.idsubdivisi', '=', 'p.idsubdivisi')
             ->join('divisi as c', 'c.id_divisi', '=', 'b.id_divisi')
-            ->leftJoin('klien as d', 'd.id', '=', 'pengajuan.idklien')
-            ->when($search, function ($e, $search) {
-                $e->where(function ($e) use ($search) {
-                    $e->where('pengajuan.nopengajuan', 'like', "%{$search}%")->orWhere('pengajuan.keterangan', 'like', "%{$search}%");
-                });
-            })
+            ->leftJoin('klien as d', 'd.id', '=', 'p.idklien')
+            ->leftJoin('logbook_pengajuan_deadlines as e', 'e.pengajuan_id', '=', 'p.idpengajuan')
+            ->leftJoin('logbook_pengajuan_ppns as f', 'f.pengajuan_id', '=', 'p.idpengajuan')
+            ->leftJoin('logbook_pengajuan_fakturs as g', 'g.pengajuan_id', '=', 'p.idpengajuan')
+            ->where('p.bayarorder', '=', 'O')
+            ->whereBetween('p.tanggal', [$from, $to])
             ->when($status, function ($q) use ($status) {
                 $q->where(function ($sub) use ($status) {
                     if (in_array('new', $status)) {
-                        $sub->orWhereDoesntHave('logs'); // belum ada log
+                        $sub->orWhereNotExists(function ($sq) {
+                            $sq->select(DB::raw(1))
+                                ->from('logbook_pengajuan_logs as l')
+                                ->whereColumn('l.pengajuan_id', 'p.idpengajuan');
+                        });
                     }
                     if (in_array('done', $status)) {
-                        $sub->orWhereHas('logs', fn($log) => $log->where('status', 1));
+                        $sub->orWhereExists(function ($sq) {
+                            $sq->select(DB::raw(1))
+                                ->from('logbook_pengajuan_logs as l')
+                                ->whereColumn('l.pengajuan_id', 'p.idpengajuan')
+                                ->where('l.status', 1);
+                        });
                     }
                     if (in_array('process', $status)) {
-                        $sub->orWhere(function ($q2) {
-                            $q2->whereHas('logs', fn($log) => $log->where('status', 0)) // ada log status=0
-                                ->whereDoesntHave('logs', fn($log) => $log->where('status', 1)); // TAPI tidak ada log status=1
+                        $sub->orWhere(function ($s) {
+                            $s->whereExists(function ($sq) {
+                                $sq->select(DB::raw(1))
+                                    ->from('logbook_pengajuan_logs as l')
+                                    ->whereColumn('l.pengajuan_id', 'p.idpengajuan')
+                                    ->where('l.status', 0);
+                            })
+                                ->whereNotExists(function ($sq) {
+                                    $sq->select(DB::raw(1))
+                                        ->from('logbook_pengajuan_logs as l')
+                                        ->whereColumn('l.pengajuan_id', 'p.idpengajuan')
+                                        ->where('l.status', 1);
+                                });
                         });
                     }
                 });
             })
-            ->where('pengajuan.bayarorder', '=', 'O')
-            ->whereBetween('pengajuan.tanggal', [$from, $to])
             ->select(
-                // 'pengajuan.*',
-                'pengajuan.idpengajuan',
-                'pengajuan.nopengajuan',
-                'pengajuan.tanggal',
-                'pengajuan.time_input',
-                'pengajuan.user_input',
-                'pengajuan.nominal',
-                'pengajuan.keterangan',
+                'p.idpengajuan',
+                'p.nopengajuan',
+                'p.tanggal',
+                'p.time_input',
+                'p.user_input',
+                'p.nominal',
+                'p.keterangan',
                 'b.subdivisi',
                 'c.nama as divisi',
                 'd.nama as klien',
                 'd.alias as klien_alias',
-                'd.kota as klien_kota'
+                'd.kota as klien_kota',
+                'e.deadline',
+                'f.status as ppn',
+                'g.status as faktur',
+                DB::raw("
+                    CASE
+                        WHEN NOT EXISTS (
+                            SELECT 1 FROM logbook_pengajuan_logs l
+                            WHERE l.pengajuan_id = p.idpengajuan
+                        ) THEN 'new'
+                        WHEN EXISTS (
+                            SELECT 1 FROM logbook_pengajuan_logs l
+                            WHERE l.pengajuan_id = p.idpengajuan
+                            AND l.status = 1
+                        ) THEN 'done'
+                        ELSE 'process'
+                    END as status_pengajuan
+                ")
             )
-            ->orderBy('pengajuan.tanggal', 'desc')
-            ->orderBy('pengajuan.idpengajuan', 'desc')
+            ->orderBy('p.tanggal', 'desc')
+            ->orderBy('p.idpengajuan', 'desc')
             ->paginate(10);
 
+        return response()->json($data);
+    }
 
+    public function pengajuanSingle($pengajuanID)
+    {
+        $data = DB::connection('alternative')->table('pengajuan as p')
+            ->join('subdivisi as b', 'b.idsubdivisi', '=', 'p.idsubdivisi')
+            ->join('divisi as c', 'c.id_divisi', '=', 'b.id_divisi')
+            ->leftJoin('klien as d', 'd.id', '=', 'p.idklien')
+            ->leftJoin('logbook_pengajuan_deadlines as e', 'e.pengajuan_id', '=', 'p.idpengajuan')
+            ->leftJoin('logbook_pengajuan_ppns as f', 'f.pengajuan_id', '=', 'p.idpengajuan')
+            ->leftJoin('logbook_pengajuan_fakturs as g', 'g.pengajuan_id', '=', 'p.idpengajuan')
+            ->where('p.bayarorder', '=', 'O')
+            ->where('p.idpengajuan', $pengajuanID)
+            ->select(
+                'p.idpengajuan',
+                'p.nopengajuan',
+                'p.tanggal',
+                'p.time_input',
+                'p.user_input',
+                'p.nominal',
+                'p.keterangan',
+                'b.subdivisi',
+                'c.nama as divisi',
+                'd.nama as klien',
+                'd.alias as klien_alias',
+                'd.kota as klien_kota',
+                'e.deadline',
+                'f.status as ppn',
+                'g.status as faktur',
+                DB::raw("
+                    CASE
+                        WHEN NOT EXISTS (
+                            SELECT 1 FROM logbook_pengajuan_logs l
+                            WHERE l.pengajuan_id = p.idpengajuan
+                        ) THEN 'new'
+                        WHEN EXISTS (
+                            SELECT 1 FROM logbook_pengajuan_logs l
+                            WHERE l.pengajuan_id = p.idpengajuan
+                            AND l.status = 1
+                        ) THEN 'done'
+                        ELSE 'process'
+                    END as status_pengajuan
+                ")
+            )
+            ->first();
+
+        return $data;
+    }
+
+    public function getLogs(Request $request)
+    {
+        $data = PengajuanLog::with('user:id,name')->where('pengajuan_id', $request->pengajuan_id)->get();
 
         return response()->json($data);
     }
@@ -107,7 +184,12 @@ class DashboardController extends Controller
                 'user_id' => Auth::id()
             ]);
 
-            return redirect()->back()->with('message', 'Log berhasil ditambahkan');
+            $data = $this->pengajuanSingle($request->pengajuan_id);
+
+            return redirect()->back()->with([
+                'message' => 'Log berhasil ditambahkan',
+                'item' => $data
+            ]);
         } catch (\Throwable $th) {
             info($th->getMessage());
             return redirect()->back()->withErrors('Terjadi kesalahan');
