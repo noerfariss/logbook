@@ -42,6 +42,7 @@ const Dashboard = () => {
     const [open, setOpen] = useState(false);
     const [openDialog, setOpenDialog] = useState(false);
     const [refresh, setRefresh] = useState(false);
+    const [statusFilter, setStatusFilter] = useState([]);
     const [dates, setDates] = useState({
         from: dayjs().startOf('month').format('YYYY-MM-DD'),
         to: dayjs(today).format('YYYY-MM-DD')
@@ -50,7 +51,7 @@ const Dashboard = () => {
     const getData = async (page = 1) => {
         setLoading(true);
         try {
-            const req = await axios.get(route('pengajuan.ajax', { page, search, dates }));
+            const req = await axios.get(route('pengajuan.ajax', { page, search, statusFilter, dates }));
             const res = await req.data;
             setDatas(res);
             setLoading(false);
@@ -60,6 +61,17 @@ const Dashboard = () => {
             setLoading(false);
         }
     }
+
+    const handleCheckboxChange = (e) => {
+        const { value, checked } = e.target;
+        setStatusFilter((prev) => {
+            if (checked) {
+                return [...prev, value]; // tambah status
+            } else {
+                return prev.filter((item) => item !== value); // hapus status
+            }
+        });
+    };
 
     useEffect(() => {
         getData();
@@ -121,14 +133,48 @@ const Dashboard = () => {
                     e.preventDefault();
                     getData();
                 }}>
-                    <div className='mb-4 w-full flex items-center gap-2 flex-col md:flex-row'>
+                    <div className='mb-2 w-full flex items-start gap-2 flex-col md:flex-row'>
                         <DateRangePicker onChange={(val) => setDates({
                             from: val.from,
                             to: val.to
                         })} />
-                        <div className='flex flex-row gap-2'>
-                            <Input className='bg-white flex-1 md:w-[300px]' placeholder='Cari No. pengajuan dan keterangan...' value={search} onChange={(e) => setSearch(e.target.value)} />
-                            <Button type='submit'>GO</Button>
+                        <div>
+                            <div className='flex flex-row gap-2 mb-2'>
+                                <Input className='bg-white flex-1 md:w-[300px]' placeholder='Cari No. pengajuan dan keterangan...' value={search} onChange={(e) => setSearch(e.target.value)} />
+                                <Button type='submit'>GO</Button>
+                            </div>
+                            <div className='flex items-start gap-4 mb-4'>
+                                <div className='flex gap-1 items-center'>
+                                    <input
+                                        type="checkbox"
+                                        id="new"
+                                        value="new"
+                                        checked={statusFilter.includes("new")}
+                                        onChange={handleCheckboxChange}
+                                    />
+                                    <label htmlFor="new">NEW</label>
+                                </div>
+                                <div className='flex gap-1 items-center'>
+                                    <input
+                                        type="checkbox"
+                                        id="process"
+                                        value="process"
+                                        checked={statusFilter.includes("process")}
+                                        onChange={handleCheckboxChange}
+                                    />
+                                    <label htmlFor="process">PROCESS</label>
+                                </div>
+                                <div className='flex gap-1 items-center'>
+                                    <input
+                                        type="checkbox"
+                                        id="done"
+                                        value="done"
+                                        checked={statusFilter.includes("done")}
+                                        onChange={handleCheckboxChange}
+                                    />
+                                    <label htmlFor="done">DONE</label>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </form>
@@ -372,24 +418,24 @@ const Dashboard = () => {
                                                                         <input
                                                                             type='radio'
                                                                             name='status'
-                                                                            id='followup'
+                                                                            id='followupProcess'
                                                                             value={0}
                                                                             checked={data.status === 0}
                                                                             onChange={() => setData('status', 0)}
                                                                         />
-                                                                        <label htmlFor='followup'>Follow Up</label>
+                                                                        <label htmlFor='followupProcess'>Follow Up</label>
                                                                     </div>
 
                                                                     <div className='flex items-center gap-1'>
                                                                         <input
                                                                             type='radio'
                                                                             name='status'
-                                                                            id='done'
+                                                                            id='followupDone'
                                                                             value={1}
                                                                             checked={data.status === 1}
                                                                             onChange={() => setData('status', 1)}
                                                                         />
-                                                                        <label htmlFor='done'>Done</label>
+                                                                        <label htmlFor='followupDone'>Done</label>
                                                                     </div>
                                                                 </div>
 

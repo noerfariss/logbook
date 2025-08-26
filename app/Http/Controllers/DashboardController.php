@@ -27,6 +27,8 @@ class DashboardController extends Controller
         $from = $dates['from'];
         $to = $dates['to'];
         $search = $request->search;
+        $status = $request->statusFilter;
+        // dd($status);
 
         $data = Pengajuan::query()
             ->with([
@@ -42,6 +44,22 @@ class DashboardController extends Controller
             ->when($search, function ($e, $search) {
                 $e->where(function ($e) use ($search) {
                     $e->where('pengajuan.nopengajuan', 'like', "%{$search}%")->orWhere('pengajuan.keterangan', 'like', "%{$search}%");
+                });
+            })
+            ->when($status, function ($q) use ($status) {
+                $q->where(function ($sub) use ($status) {
+                    if (in_array('new', $status)) {
+                        $sub->orWhereDoesntHave('logs'); // belum ada log
+                    }
+                    if (in_array('done', $status)) {
+                        $sub->orWhereHas('logs', fn($log) => $log->where('status', 1));
+                    }
+                    if (in_array('process', $status)) {
+                        $sub->orWhere(function ($q2) {
+                            $q2->whereHas('logs', fn($log) => $log->where('status', 0)) // ada log status=0
+                                ->whereDoesntHave('logs', fn($log) => $log->where('status', 1)); // TAPI tidak ada log status=1
+                        });
+                    }
                 });
             })
             ->where('pengajuan.bayarorder', '=', 'O')
@@ -64,6 +82,8 @@ class DashboardController extends Controller
             ->orderBy('pengajuan.tanggal', 'desc')
             ->orderBy('pengajuan.idpengajuan', 'desc')
             ->paginate(10);
+
+
 
         return response()->json($data);
     }
