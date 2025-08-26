@@ -38,6 +38,11 @@ class DashboardController extends Controller
             ->leftJoin('logbook_pengajuan_fakturs as g', 'g.pengajuan_id', '=', 'p.idpengajuan')
             ->where('p.bayarorder', '=', 'O')
             ->whereBetween('p.tanggal', [$from, $to])
+            ->when($search, function ($e, $search) {
+                $e->where(function ($e) use ($search) {
+                    $e->where('p.nopengajuan', 'like', "%{$search}%")->orWhere('p.keterangan', 'like', "{$search}");
+                });
+            })
             ->when($status, function ($q) use ($status) {
                 $q->where(function ($sub) use ($status) {
                     if (in_array('new', $status)) {
