@@ -109,14 +109,14 @@ const UsersTab = () => {
         };
 
         if (editing) {
-            put(route('management-user.users.update', editing.id), options);
+            put(route('management-user.users.update', editing.uuid), options);
         } else {
             post(route('management-user.users.store'), options);
         }
     }
 
     const handleDelete = () => {
-        router.delete(route('management-user.users.destroy', deleteTarget.id), {
+        router.delete(route('management-user.users.destroy', deleteTarget.uuid), {
             preserveScroll: true,
             onSuccess: () => {
                 setDeleteTarget(null);
@@ -131,7 +131,7 @@ const UsersTab = () => {
     }
 
     const handleLoginAs = (user) => {
-        router.post(route('management-user.users.login-as', user.id), {}, {
+        router.post(route('management-user.users.login-as', user.uuid), {}, {
             onError: (err) => toast.error(Object.values(err)[0] ?? 'Terjadi kesalahan'),
         });
     }
