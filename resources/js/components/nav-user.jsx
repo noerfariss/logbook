@@ -5,6 +5,7 @@ import {
     FileLock,
     LockKeyhole,
     LogOutIcon,
+    UsersRound,
 } from "lucide-react"
 
 import {
@@ -32,7 +33,9 @@ import DialogComponent from "./DialogComponent"
 
 export function NavUser() {
     const { isMobile } = useSidebar();
-    const { user } = usePage().props;
+    const { user, permissions = [] } = usePage().props;
+
+    const canManageUsers = ['user-read', 'role-read', 'permission-read'].some((p) => permissions.includes(p));
 
     const handleLogout = (e) => {
         e.preventDefault();
@@ -70,6 +73,12 @@ export function NavUser() {
                                 <CircleUserRound />
                                 Profil
                             </DropdownMenuItem>
+                            {canManageUsers &&
+                                <DropdownMenuItem onClick={() => router.get(route('management-user.index'))}>
+                                    <UsersRound />
+                                    Management User
+                                </DropdownMenuItem>
+                            }
                             <DropdownMenuItem onClick={() => router.get(route('password'))}>
                                 <LockKeyhole />
                                 Ganti Password

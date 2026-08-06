@@ -29,9 +29,6 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
-        // $permissions =  $request->user()?->getPermissionViaRoles();
-        // dd($permissions);
-
         return [
             ...parent::share($request),
             'website' => env('APP_NAME'),
@@ -41,7 +38,8 @@ class HandleInertiaRequests extends Middleware
             'user' => $request->user(),
             'message' => $request->session()->get('message'),
             'item' => $request->session()->get('item'),
-            // 'permissions' => $request->user()?->getPermissionViaRoles()
+            'permissions' => $request->user()?->getAllPermissions()->pluck('name'),
+            'impersonating' => $request->session()->has('impersonator_id'),
         ];
     }
 }
