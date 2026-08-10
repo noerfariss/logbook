@@ -44,5 +44,8 @@ class PermissionSeeder extends Seeder
 
         Permission::create(['name' => 'activitylog-read']);
         Permission::create(['name' => 'dashboard-read']);
+
+        Permission::create(['name' => 'vendor-list-read']);
+        Permission::create(['name' => 'vendor-list-update']);
     }
 }

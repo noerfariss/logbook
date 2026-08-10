@@ -17,6 +17,7 @@ import dayjs from "dayjs"
 import 'dayjs/locale/id' // <- import locale Indonesia
 import { ToastContainer } from "react-toastify"
 import { UserRoundCog } from "lucide-react"
+import { cn } from "@/lib/utils"
 dayjs.locale('id') // <- set locale global ke Indonesia
 
 export default function Layout({ children, pageTitle = 'Kuaat' }) {
@@ -53,7 +54,7 @@ export default function Layout({ children, pageTitle = 'Kuaat' }) {
                                 orientation="vertical"
                                 className="mr-2 data-[orientation=vertical]:h-4 hidden md:block"
                             />
-                            <Breadcrumb className='hidden md:block'>
+                            <Breadcrumb className='hidden lg:block'>
                                 <BreadcrumbList>
                                     <BreadcrumbItem>
                                         <BreadcrumbPage>{dayjs().format('dddd, DD MMMM YYYY')}</BreadcrumbPage>
@@ -61,6 +62,26 @@ export default function Layout({ children, pageTitle = 'Kuaat' }) {
                                 </BreadcrumbList>
                             </Breadcrumb>
                         </div>
+                        <nav className='flex items-center gap-1'>
+                            <Link
+                                href={route('dashboard')}
+                                className={cn(
+                                    'px-3 py-1.5 rounded-md text-sm font-medium',
+                                    route().current('dashboard') ? 'bg-primary text-primary-foreground' : 'text-gray-600 hover:bg-gray-100'
+                                )}
+                            >
+                                Data Logbook
+                            </Link>
+                            <Link
+                                href={route('vendor-list.index')}
+                                className={cn(
+                                    'px-3 py-1.5 rounded-md text-sm font-medium',
+                                    route().current('vendor-list.*') ? 'bg-primary text-primary-foreground' : 'text-gray-600 hover:bg-gray-100'
+                                )}
+                            >
+                                Vendor Survey
+                            </Link>
+                        </nav>
                         <div>
                             <NavUser />
                         </div>

@@ -10,6 +10,7 @@ use App\Http\Controllers\LogController;
 use App\Http\Controllers\ManagementUserController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SuratController;
+use App\Http\Controllers\VendorListController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -61,5 +62,13 @@ Route::prefix('auth')->middleware(['auth'])->group(function () {
         Route::middleware('permission:permission-create')->post('/permissions', [ManagementUserController::class, 'storePermission'])->name('permissions.store');
         Route::middleware('permission:permission-update')->put('/permissions/{permission}', [ManagementUserController::class, 'updatePermission'])->name('permissions.update');
         Route::middleware('permission:permission-delete')->delete('/permissions/{permission}', [ManagementUserController::class, 'destroyPermission'])->name('permissions.destroy');
+    });
+
+    Route::prefix('vendor-list')->name('vendor-list.')->group(function () {
+        Route::get('/', [VendorListController::class, 'index'])->name('index');
+        Route::get('/ajax', [VendorListController::class, 'ajax'])->name('ajax');
+        Route::get('/toko-options', [VendorListController::class, 'tokoOptions'])->name('toko.options');
+        Route::get('/vendor-options', [VendorListController::class, 'vendorOptions'])->name('vendor.options');
+        Route::post('/update', [VendorListController::class, 'update'])->name('update');
     });
 });
