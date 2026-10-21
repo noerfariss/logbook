@@ -40,7 +40,7 @@ class DashboardController extends Controller
             ->whereBetween('p.tanggal', [$from, $to])
             ->when($search, function ($e, $search) {
                 $e->where(function ($e) use ($search) {
-                    $e->where('p.nopengajuan', 'like', "%{$search}%")->orWhere('p.keterangan', 'like', "{$search}");
+                    $e->where('p.nopengajuan', 'like', "%{$search}%")->orWhere('p.keterangan', 'like', "%{$search}%");
                 });
             })
             ->when($status, function ($q) use ($status) {
